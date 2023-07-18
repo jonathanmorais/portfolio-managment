@@ -3,8 +3,10 @@ import quantstats as qs
 from scipy.stats import kurtosis
 import numpy as np
 import yfinance as yf
+from typing import List
 
-from .base import AbstractStockDataProvider, AbstractStockMetricsCalculate, AbstractStockReturn
+from .base import AbstractStockDataProvider, AbstractStockMetricsCalculate, AbstractStockReturn, AbstractStockMetricsResponse
+from app.dto.portifolio import UserRequest, UserResponse
 
 class StockDataProvider(AbstractStockDataProvider):
     def __init__(self, tickers, index, period):
@@ -32,8 +34,8 @@ class StockReturn(AbstractStockReturn):
 
 
 class StockMetricsCalculate(AbstractStockMetricsCalculate):
-    def __init__(self, weight, log_return, index_return):
-        self.weight = weight
+    def __init__(self, weights, log_return, index_return):
+        self.weights = weights
         self.log_return = log_return
         self.index_return = index_return
 
@@ -42,16 +44,16 @@ class StockMetricsCalculate(AbstractStockMetricsCalculate):
         portfolio_cov = log_ret.cov() * 252
 
         if annualized:
-            portfolio_weights = np.array(self.weight)
+            portfolio_weights = np.array(self.weights)
             portfolio_std = np.sqrt(np.dot(portfolio_weights.T, np.dot(portfolio_cov, portfolio_weights)))
             volatility = portfolio_std * np.sqrt(252)
-            return volatility
+            return float(volatility)
 
     def calculate_sharpe_ratio(self):
         returns = self.log_return * 252
         sharpe_ratio = qs.stats.sharpe(returns, rf=0)
         sharpe_ratio_rounded = np.round(sharpe_ratio, decimals=2)
-        return sharpe_ratio_rounded
+        return float(sharpe_ratio_rounded)
 
     def calculate_beta(self):
         portfolio_cov = self.log_return.cov()
@@ -63,13 +65,20 @@ class StockMetricsCalculate(AbstractStockMetricsCalculate):
         market_variance = portfolio_benchmark.var() * 252
 
         beta_rounded = format(covariance_port / market_variance, 'f')
-        return beta_rounded
+        return float(beta_rounded)
 
     def calculate_kurtosis(self):
         kurt = kurtosis(self.log_return, fisher=False)
-        return kurt
+        return float(kurt)
 
-    def execute(self):
+class RequestMetrics:
+    def __init__(self, period: str, tickers: List[str], index: str, weights: List[float]):
+        self.period  = period
+        self.tickers = tickers
+        self.index   = index
+        self.weights = weights
+
+    def execute(self) -> UserResponse:
         stock_data_provider = StockDataProvider(self.tickers, self.index, self.period)
         stock_data = stock_data_provider.download_stock_data()
         index_data = stock_data_provider.download_index_data()
@@ -78,6 +87,13 @@ class StockMetricsCalculate(AbstractStockMetricsCalculate):
         stock_log_return = stock_return_calculator.calculate_portfolio_returns()
         index_return = stock_return_calculator.calculate_index_return()
 
-        status_portfolio_report = StockMetricsCalculate()
+        stock_analyzer = StockMetricsCalculate(self.weights, stock_log_return, index_return)
 
-        return stock_log_return, index_return
+        response = UserResponse(
+            volatility=stock_analyzer.calculate_volatility_return(),
+            sharpe_ratio=stock_analyzer.calculate_sharpe_ratio(),
+            beta=stock_analyzer.calculate_beta(),
+            kurtosis=stock_analyzer.calculate_kurtosis()
+        )
+
+        return response
