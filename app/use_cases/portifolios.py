@@ -32,7 +32,6 @@ class StockReturn(AbstractStockReturn):
     def calculate_index_return(self):
         return self.data_provided.pct_change(1).dropna()
 
-
 class StockMetricsCalculate(AbstractStockMetricsCalculate):
     def __init__(self, weights, log_return, index_return):
         self.weights = weights
@@ -53,19 +52,19 @@ class StockMetricsCalculate(AbstractStockMetricsCalculate):
         returns = self.log_return * 252
         sharpe_ratio = qs.stats.sharpe(returns, rf=0)
         sharpe_ratio_rounded = np.round(sharpe_ratio, decimals=2).tolist()
-        print(sharpe_ratio_rounded)
-        print(type(sharpe_ratio_rounded))
         return sharpe_ratio_rounded
 
-    def calculate_beta(self):
-        portfolio_cov = self.log_return.cov()
-        annual_cov = portfolio_cov * 252
-        covariance_port = annual_cov.iloc[0, 1]
-        benchmark_index = self.index_return
-        market_variance = benchmark_index.var() * 252
+    def calculate_beta(self, annualized=True):
+        log_ret = self.log_return
+        portfolio_cov = log_ret.cov()
+        if annualized:
+            annual_cov = portfolio_cov * 252
+            covariance_port = annual_cov.iloc[0, 1]
+            benchmark_index = self.index_return
+            market_variance = benchmark_index.var() * 252
 
-        beta = covariance_port / market_variance
-        return beta
+            beta = covariance_port / market_variance
+            return beta
 
     def calculate_kurtosis(self):
         kurt = kurtosis(self.log_return, axis=0, bias=True).tolist()
