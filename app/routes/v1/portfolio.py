@@ -7,14 +7,14 @@ from app.use_cases.portifolios import RequestMetrics
 router = APIRouter()
 
 @router.post("/status")
-async def get_portifolio_status(request: UserRequest, response: UserResponse) -> List[Dict]:
+async def get_portifolio_status(request: UserRequest) -> Dict:
     # You can access the request data through the `request` parameter
-    period = request.period
+    period  = request.period
     tickers = request.tickers
-    index = request.index
+    index   = request.index
     weights = request.weights
 
-    logging.info(request)
+    print(request)
 
     metrics_calculator = RequestMetrics(period, tickers, index, weights)
     response = metrics_calculator.execute()

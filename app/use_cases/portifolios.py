@@ -52,24 +52,24 @@ class StockMetricsCalculate(AbstractStockMetricsCalculate):
     def calculate_sharpe_ratio(self):
         returns = self.log_return * 252
         sharpe_ratio = qs.stats.sharpe(returns, rf=0)
-        sharpe_ratio_rounded = np.round(sharpe_ratio, decimals=2)
-        return float(sharpe_ratio_rounded)
+        sharpe_ratio_rounded = np.round(sharpe_ratio, decimals=2).tolist()
+        print(sharpe_ratio_rounded)
+        print(type(sharpe_ratio_rounded))
+        return sharpe_ratio_rounded
 
     def calculate_beta(self):
         portfolio_cov = self.log_return.cov()
-        benchmark_index = self.index_return
         annual_cov = portfolio_cov * 252
         covariance_port = annual_cov.iloc[0, 1]
+        benchmark_index = self.index_return
+        market_variance = benchmark_index.var() * 252
 
-        portfolio_benchmark = benchmark_index.pct_change(1).dropna()
-        market_variance = portfolio_benchmark.var() * 252
-
-        beta_rounded = format(covariance_port / market_variance, 'f')
-        return float(beta_rounded)
+        beta = covariance_port / market_variance
+        return beta
 
     def calculate_kurtosis(self):
-        kurt = kurtosis(self.log_return, fisher=False)
-        return float(kurt)
+        kurt = kurtosis(self.log_return, axis=0, bias=True).tolist()
+        return kurt
 
 class RequestMetrics:
     def __init__(self, period: str, tickers: List[str], index: str, weights: List[float]):
