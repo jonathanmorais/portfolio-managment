@@ -5,3 +5,36 @@ Portfolio management is the art and science of selecting and overseeing a group 
 
 ## Project
 Given a data, this engine have a propols to be a engine to provide some metrics based on MPT (Modern Portfolio Theory).
+
+
+## use
+  
+
+```
+
+curl -i -X POST -H "Content-Type: application/json" -d '{
+	"period": "5y",
+	"tickers": ["UBER", "GOOGL", "MSFT"],
+	"index": "^GSPC",
+	"weights": [0.4, 0.4, 0.2],
+	"risk_rate": 0
+}' http://localhost:8000/v1/status
+
+```
+
+  
+
+### Explanation
+
+The service accept the parameters above, it will make some statiscal calculations around of the dataset called automaticly. For now, the service calculate the Volatility, Kurtosis, Shape Ratio and Beta coeficient.
+
+  
+## Response
+
+The response from http call, should be something like:
+
+```
+
+{"volatility":"4.98","sharpe_ratio":"0.47","beta":"1.7539956706304167","kurtosis":"6.7"}
+
+```
