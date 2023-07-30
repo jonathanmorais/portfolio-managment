@@ -10,7 +10,7 @@ class UserRequest(BaseModel):
     weights: List[float]
 
 class UserResponse(BaseModel):
-    volatility: float
-    sharpe_ratio: List
-    beta: List
-    kurtosis: List
+    volatility: str
+    sharpe_ratio: str
+    beta: str
+    kurtosis: str

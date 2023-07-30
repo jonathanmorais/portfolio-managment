@@ -45,14 +45,13 @@ class StockMetricsCalculate(AbstractStockMetricsCalculate):
         if annualized:
             portfolio_weights = np.array(self.weights)
             portfolio_std = np.sqrt(np.dot(portfolio_weights.T, np.dot(portfolio_cov, portfolio_weights)))
-            volatility = portfolio_std * np.sqrt(252)
-            return float(volatility)
+            volatility = round(portfolio_std * np.sqrt(252), 3)
+            return str(volatility)
 
     def calculate_sharpe_ratio(self):
-        returns = self.log_return * 252
-        sharpe_ratio = qs.stats.sharpe(returns, rf=0)
-        sharpe_ratio_rounded = np.round(sharpe_ratio, decimals=2).tolist()
-        return sharpe_ratio_rounded
+        sharpe_ratio = np.round(qs.stats.sharpe(self.log_return, rf=0), decimals=2)
+        sharpe_ratio = round(sharpe_ratio.mean(), 2)
+        return str(sharpe_ratio)
 
     def calculate_beta(self, annualized=True):
         log_ret = self.log_return
@@ -64,11 +63,12 @@ class StockMetricsCalculate(AbstractStockMetricsCalculate):
             market_variance = benchmark_index.var() * 252
 
             beta = covariance_port / market_variance
-            return beta
+            return str(beta)
 
     def calculate_kurtosis(self):
-        kurt = kurtosis(self.log_return, axis=0, bias=True).tolist()
-        return kurt
+        kurt_median = qs.stats.kurtosis(self.log_return).mean()
+        kurt        = round(kurt_median, 2)
+        return str(kurt)
 
 class RequestMetrics:
     def __init__(self, period: str, tickers: List[str], index: str, weights: List[float]):
@@ -83,8 +83,9 @@ class RequestMetrics:
         index_data = stock_data_provider.download_index_data()
 
         stock_return_calculator = StockReturn(stock_data)
+        index_return_calculator = StockReturn(index_data)
         stock_log_return = stock_return_calculator.calculate_portfolio_returns()
-        index_return = stock_return_calculator.calculate_index_return()
+        index_return = index_return_calculator.calculate_index_return()
 
         stock_analyzer = StockMetricsCalculate(self.weights, stock_log_return, index_return)
 
