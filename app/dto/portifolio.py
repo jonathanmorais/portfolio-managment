@@ -8,6 +8,7 @@ class UserRequest(BaseModel):
     tickers: List[str]
     index: str
     weights: List[float]
+    risk_rate: float
 
 class UserResponse(BaseModel):
     volatility: str

@@ -33,10 +33,11 @@ class StockReturn(AbstractStockReturn):
         return self.data_provided.pct_change(1).dropna()
 
 class StockMetricsCalculate(AbstractStockMetricsCalculate):
-    def __init__(self, weights, log_return, index_return):
+    def __init__(self, weights, log_return, index_return, risk_rate):
         self.weights = weights
         self.log_return = log_return
         self.index_return = index_return
+        self.risk_rate = risk_rate
 
     def calculate_volatility_return(self, annualized=True):
         log_ret = self.log_return
@@ -49,7 +50,7 @@ class StockMetricsCalculate(AbstractStockMetricsCalculate):
             return str(volatility)
 
     def calculate_sharpe_ratio(self):
-        sharpe_ratio = np.round(qs.stats.sharpe(self.log_return, rf=0), decimals=2)
+        sharpe_ratio = np.round(qs.stats.sharpe(self.log_return, rf=self.risk_rate), decimals=2)
         sharpe_ratio = round(sharpe_ratio.mean(), 2)
         return str(sharpe_ratio)
 
@@ -71,11 +72,12 @@ class StockMetricsCalculate(AbstractStockMetricsCalculate):
         return str(kurt)
 
 class RequestMetrics:
-    def __init__(self, period: str, tickers: List[str], index: str, weights: List[float]):
+    def __init__(self, period: str, tickers: List[str], index: str, weights: List[float], risk_rate: float):
         self.period  = period
         self.tickers = tickers
         self.index   = index
         self.weights = weights
+        self.risk_rate = risk_rate
 
     def execute(self) -> UserResponse:
         stock_data_provider = StockDataProvider(self.tickers, self.index, self.period)
@@ -87,7 +89,7 @@ class RequestMetrics:
         stock_log_return = stock_return_calculator.calculate_portfolio_returns()
         index_return = index_return_calculator.calculate_index_return()
 
-        stock_analyzer = StockMetricsCalculate(self.weights, stock_log_return, index_return)
+        stock_analyzer = StockMetricsCalculate(self.weights, stock_log_return, index_return, self.risk_rate)
 
         response = UserResponse(
             volatility=stock_analyzer.calculate_volatility_return(),

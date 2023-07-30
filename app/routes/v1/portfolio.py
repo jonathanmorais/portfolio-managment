@@ -13,10 +13,11 @@ async def get_portifolio_status(request: UserRequest) -> Dict:
     tickers = request.tickers
     index   = request.index
     weights = request.weights
+    risk_rate = request.risk_rate
 
     print(request)
 
-    metrics_calculator = RequestMetrics(period, tickers, index, weights)
+    metrics_calculator = RequestMetrics(period, tickers, index, weights, risk_rate)
     response = metrics_calculator.execute()
 
     response_metric = {
