@@ -112,26 +112,35 @@ class RequestMetrics:
         self.weights = weights
         self.risk_rate = risk_rate
 
-    def execute(self) -> UserResponse:
-        try:
-            stock_data_provider = StockDataProvider(self.tickers, self.index, self.period)
-            stock_data = stock_data_provider.download_stock_data()
-            index_data = stock_data_provider.download_index_data()
+def execute(self) -> UserResponse:
+    """
+    Executes the function and returns a UserResponse object.
 
-            stock_return_calculator = StockReturn(stock_data)
-            index_return_calculator = StockReturn(index_data)
-            stock_log_return = stock_return_calculator.calculate_portfolio_returns()
-            index_return = index_return_calculator.calculate_index_return()
+    Returns:
+        UserResponse: The response object containing the calculated metrics.
 
-            stock_analyzer = StockMetricsCalculate(self.weights, stock_log_return, index_return, self.risk_rate)
+    Raises:
+        ValueError: If there is an error executing the function.
+    """
+    stock_data_provider = StockDataProvider(self.tickers, self.index, self.period)
+    stock_data = stock_data_provider.download_stock_data()
+    index_data = stock_data_provider.download_index_data()
 
-            response = UserResponse(
-                volatility=stock_analyzer.calculate_volatility_return(),
-                sharpe_ratio=stock_analyzer.calculate_sharpe_ratio(),
-                beta=stock_analyzer.calculate_beta(),
-                kurtosis=stock_analyzer.calculate_kurtosis(),
-            )
+    stock_return_calculator = StockReturn(stock_data)
+    index_return_calculator = StockReturn(index_data)
 
-            return response
-        except Exception as e:
-            raise ValueError(f"Failed to execute RequestMetrics: {e}")
+    stock_log_return = stock_return_calculator.calculate_portfolio_returns()
+    index_return = index_return_calculator.calculate_index_return()
+
+    stock_analyzer = StockMetricsCalculate(self.weights, stock_log_return, index_return, self.risk_rate)
+
+    try:
+        response = UserResponse(
+            volatility=stock_analyzer.calculate_volatility_return(),
+            sharpe_ratio=stock_analyzer.calculate_sharpe_ratio(),
+            beta=stock_analyzer.calculate_beta(),
+            kurtosis=stock_analyzer.calculate_kurtosis(),
+        )
+        return response
+    except Exception as e:
+        raise ValueError(f"Failed to execute RequestMetrics: {e}")
