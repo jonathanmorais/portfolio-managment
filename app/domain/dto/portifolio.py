@@ -1,7 +1,5 @@
 from pydantic import BaseModel
-from pydantic import Field
-from typing import List, Optional
-import pandas as pd
+from typing import List
 
 class UserRequest(BaseModel):
     period: str
@@ -11,6 +9,12 @@ class UserRequest(BaseModel):
     risk_rate: float
 
 class UserResponse(BaseModel):
+    volatility: str
+    sharpe_ratio: str
+    beta: str
+    kurtosis: str
+
+class MetricsResponse(BaseModel):
     volatility: str
     sharpe_ratio: str
     beta: str
