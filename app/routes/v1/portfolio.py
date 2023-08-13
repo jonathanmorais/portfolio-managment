@@ -1,33 +1,28 @@
 import logging
 from fastapi import APIRouter
-from typing import List, Dict
-from app.dto.portifolio import UserRequest, UserResponse
+from typing import Dict
+from app.domain.dto.portifolio import UserRequest, UserResponse
+from app.controller.main import ControllerAnalyzer 
 from app.use_cases.portifolios import RequestMetrics
 
 router = APIRouter()
 
 @router.post("/status")
-async def get_portifolio_status(request: UserRequest) -> Dict:
-    # You can access the request data through the `request` parameter
-    period  = request.period
-    tickers = request.tickers
-    index   = request.index
-    weights = request.weights
-    risk_rate = request.risk_rate
+async def get_portfolio_status(user_request: UserRequest) -> Dict:
+    period = user_request.period
+    tickers = user_request.tickers
+    index = user_request.index
+    weights = user_request.weights
+    risk_rate = user_request.risk_rate
 
-    print(request)
+    response_controller = ControllerAnalyzer(period, tickers, index, weights, risk_rate).controller_stock_analyzer().execute()
 
-    metrics_calculator = RequestMetrics(period, tickers, index, weights, risk_rate)
-    response = metrics_calculator.execute()
-
-    response_metric = {
-        "volatility": response.volatility,
-        "sharpe_ratio": response.sharpe_ratio,
-        "beta": response.beta,
-        "kurtosis": response.kurtosis
+    return {
+        "volatility": response_controller.volatility,
+        "sharpe_ratio": response_controller.sharpe_ratio,
+        "beta": response_controller.beta,
+        "kurtosis": response_controller.kurtosis
     }
-
-    return response_metric
 
 @router.get("/health")
 async def get_health():
