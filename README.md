@@ -1,3 +1,5 @@
+:receipt: :bar_chart: :chart_with_upwards_trend: Generate common performance metrics to Portfolio.
+
 ## What Is Portfolio Management?
 Portfolio management is the art and science of selecting and overseeing a group of investments that meet the long-term financial objectives and risk tolerance of a client, a company, or an institution.
 [see https://www.investopedia.com/terms/p/portfoliomanagement.asp].
