@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from starlette_exporter import PrometheusMiddleware, handle_metrics
 
-from app.routes.v1 import portfolio as port_v1 
+from app.infrastructure.routes.v1 import portfolio as port_v1 
 
 app = FastAPI()
 
