@@ -1,9 +1,7 @@
-import logging
 from fastapi import APIRouter
 from typing import Dict
-from app.domain.dto.portifolio import UserRequest, UserResponse
-from app.controller.main import ControllerAnalyzer 
-from app.use_cases.portifolios import RequestMetrics
+from app.domain.dto.portifolio import UserRequest
+from app.controller.main import ControllerAnalyzer
 
 router = APIRouter()
 
